@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>PacMan Demo</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- <link rel="stylesheet" type="text/css" media="screen" href="PacMan.css" />
+        <script src="PacMan.js"></script> -->
+        <style>
+            *{
+                margin: 0;
+                padding: 0;
+            }
+            body{
+                background-color: black;
+            }
+            .container{
+                position: relative;
+            }
+            .row{
+                height: 20px; /*This is needed because the height auto/adds a margin on top and bottom to fit the divs within. */
+            }
+            .row div{
+                width: 20px;
+                height: 20px;
+                display: inline-block;
+                line-height: 0;
+            }
+            div.brick{
+                background-color: blue;
+                display: inline-block;
+            }
+            div.cherry{
+                background-image: url(images/cherry.png);
+                background-size: contain;
+                display: inline-block;
+            }
+            div.coin{
+                background-image: url(images/coin.png);
+                background-size: contain;
+                display: inline-block;
+                /* background-repeat: no-repeat;
+                background-position: center;  These did not work with my image. */
+            }
+            #pacman{
+                background-image: url(images/pacman.gif);
+                background-size: contain;
+                width: 20px;
+                height: 20px;
+                position: absolute;
+                transform: rotateX(0deg);
+            }
+            div.empty{
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+            }
+            #score{
+                border: 1px solid white;
+                color: white;
+                font-size: 20px;
+                min-width: 100px;
+                height: 40px;
+                text-align: center;
+                padding: 5px;
+                margin: 5px;
+                display: inline-block;
+                vertical-align: middle;
+                line-height: 35px;
+            }
+        </style>
+
+    </head>
+    <body>
+        <div class = "container">
+                <div id="world"></div>
+                <div id='pacman'></div>
+                <div id='score'></div>
+        </div>
+    </body>
+<script>
+    // List of features to build:
+
+    // 4) make map a variable width height and pathing clear
+    // 7) spawn a ghost, when pacman hits ghost he loses a life
+    // 8) make ghost move
+    // 9) 2 pacmans on one Keyboard
+    // 10) keep score and life count 5 and 7 but displayed Better 
+    // 11) random symmetrical world
+
+    // var width = 11;
+    // var height = 11;
+    
+    var u = 0
+    var world = [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,1],
+    [1,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,1],
+    [1,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,1],
+    [1,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,1],
+    [1,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,1],
+    [1,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,1],
+    [1,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,1],
+    [1,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,1],
+    [1,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,1],
+    [1,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,1],
+    [1,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+];
+
+function reshapeWorld(world){
+    for(row = 0; row < world.length; row++){
+        for(var y = 0; y < world[row].length; y++){
+            if(world[row][y] == u){
+                world[row][y] = Math.floor((Math.random()*4));
+                // opened up world for testing
+            }
+        }
+    }
+    return world;
+}
+reshapeWorld(world);
+    var worldDict = {
+        0: "empty",
+        1: "brick",
+        2: "coin",
+        3: "cherry",
+        4: ""
+    }
+
+    // function randomWorld(y,x){
+    //     var c = 0;
+    //     for(var a = 0; a < y; a++){
+    //         for(var b = 0; b < x; b++){
+    //             if(world[a][b] == p){
+    //                 world[a][b].push(2)
+    //             }else{
+    //                 world[a][b].push(0);
+    //             }
+                
+    //         }
+    //     }
+    // }
+    // randomWorld(11, 11);
+
+    var totalScore = 0;
+
+    function displayScore(){
+        output = totalScore;
+        document.getElementById('score').innerHTML = output;
+    }
+
+    function drawWorld(){
+        output = "";
+
+        for(var row = 0; row < world.length; row++){
+            output += "<div class = 'row'>"
+            for(var x = 0; x < world[row].length; x++){
+                output += "<div class = '" + worldDict[world[row][x]] +"'></div>"
+            }
+            output += "</div>"
+        }
+
+        document.getElementById('world').innerHTML = output;
+    }
+    drawWorld();
+
+    var pacman = {
+        x: 1,
+        y: 1
+    }
+
+    function displayPacman(x){
+            document.getElementById('pacman').style.left = pacman.x*20  + "px";
+            document.getElementById('pacman').style.top = pacman.y*20  + "px";
+            document.getElementById('pacman').style.transform = "rotateZ(" +  x + "deg)";
+    }
+    displayPacman('R');
+
+    document.onkeydown = function(e){
+        if(e.keyCode == 37){ // left
+            if(world[pacman.y][pacman.x-1] !=1){
+            pacman.x--;
+            displayPacman(180);
+            }
+        }
+        else if(e.keyCode == 38){ // up
+            if(world[pacman.y-1][pacman.x] !=1){
+            pacman.y--;
+            displayPacman(-90);
+            }
+        }
+        else if(e.keyCode == 39){ // right
+            if(world[pacman.y][pacman.x+1] !=1){
+            pacman.x++;
+            displayPacman(0);
+            }
+        }
+        else if(e.keyCode == 40){ // down
+            if(world[pacman.y+1][pacman.x] !=1){
+            pacman.y++;
+            displayPacman(90);
+            }
+        }
+        if(world[pacman.y][pacman.x] ==2){
+            world[pacman.y][pacman.x] = 0;
+            totalScore += 10;
+            drawWorld();
+        }
+        if(world[pacman.y][pacman.x] ==3){
+            world[pacman.y][pacman.x] = 0;
+            totalScore += 50;
+            drawWorld();
+        }
+        displayScore();
+    }
+
+    
+
+
+
+</script>
+</html>
